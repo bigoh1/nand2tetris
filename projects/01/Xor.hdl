@@ -13,5 +13,17 @@ CHIP Xor {
     OUT out;
 
     PARTS:
-    // Put your code here:
+    // We'll derive the expression from the truth table:
+    // a b | a (+) b
+    //-----+--------
+    // 1 1 |   0
+    // 1 0 |   1     
+    // 0 1 |   1
+    // 0 0 |   0
+    // 
+    // we need a function that returns true if (a=1 AND b=0) OR (a=0 AND b=1), that is f(a, b) = (~a ^ b) v (a ^ ~b) = [(~a ^ b) v a] ^ [(~a ^ b) v ~b] = (a v b) ^ (~a v ~b) = (a v b) ^ ~(a ^ b)
+
+    Or (a=a, b=b, out=orOut);
+    Nand (a=a, b=b, out=nandOut);
+    And (a=orOut, b=nandOut, out=out);
 }
