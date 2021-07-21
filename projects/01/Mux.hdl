@@ -9,36 +9,22 @@
  *       b otherwise
  */
 
- /* It's easy to prove the following properties:
-  * (1) (x ^ y) ^ z = x ^ (y ^ z)
-  * (2) 1 ^ x = x
-  * (3) 0 ^ x = 0
-  * (4) 1 XOR x = ~x
-  * (5) 0 XOR x = x
-  * (6) x XOR x = 0
-  *
-  * Then, we can construct the following expression:
-  * (sel ^ a) XOR (~sel ^ b) XOR a XOR b
-  * 
-  * Case when sel = 0:
-  * (0 ^ a) XOR (1 ^ b) XOR a XOR b
-  * ~~~~~~~ <-------------------------- = 0, see (3)
-  *              ~~~~~~ <-------------- = b, see (2)
-  * ~~~~~~~~~~~~~~~~~~~ <-------------- = b, see (5)
-  * ~~~~~~~~~~~~~~~~~~~ ..... ~~~~~~ <- = 0, see (6)
-  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ <- = a, see (5)
-  *
-  * In case when sel = 1 it's almost the same: `a XOR 0 XOR a XOR b = b`
-  */
+/* We know that
+ * (*) x v 0 = x
+ * 
+ * Then it's obvious that the following expression solves the problem:
+ * (~sel ^ a) v (sel ^ b)
+ * 
+ * In case of sel = 0, we get (1 ^ a) v (0 ^ b) = a v 0 = a
+ * When sel = 1, we get (0 ^ a) v (1 ^ b) = 0 v b = b
+ */
 CHIP Mux {
     IN a, b, sel;
     OUT out;
 
     PARTS:
-    And (a=a, b=sel, out=w1);
     Not (in=sel, out=notSel);
-    And (a=b, b=notSel, out=w2);
-    Xor (a=w1, b=w2, out=w3);
-    Xor (a=w3, b=a, out=w4);
-    Xor (a=w4, b=b, out=out);
+    And (a=a, b=notSel, out=w1);
+    And (a=b, b=sel, out=w2);
+    Or (a=w1, b=w2, out=out);
 }
